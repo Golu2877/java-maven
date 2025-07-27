@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'M3'   // Maven tool name from Jenkins config
+        maven 'M3'
     }
 
     stages {
@@ -12,9 +12,21 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build & Test') {
             steps {
-                sh 'mvn clean install'
+                sh 'mvn clean verify'
+            }
+        }
+
+        stage('Publish Test Results') {
+            steps {
+                junit 'target/surefire-reports/*.xml'
+            }
+        }
+
+        stage('Code Coverage (JaCoCo)') {
+            steps {
+                jacoco execPattern: 'target/jacoco.exec'
             }
         }
 
@@ -22,6 +34,12 @@ pipeline {
             steps {
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline Finished'
         }
     }
 }
