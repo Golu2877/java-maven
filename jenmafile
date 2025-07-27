@@ -1,45 +1,13 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'M3'
-    }
-
     stages {
-        stage('Clone') {
+        stage('Build and Test') {
             steps {
-                git 'https://github.com/spring-projects/spring-petclinic.git'
+                dir('java-maven/myapp') {
+                    sh 'mvn clean test'
+                }
             }
-        }
-
-        stage('Build & Test') {
-            steps {
-                sh 'mvn clean verify'
-            }
-        }
-
-        stage('Publish Test Results') {
-            steps {
-                junit 'target/surefire-reports/*.xml'
-            }
-        }
-
-        stage('Code Coverage (JaCoCo)') {
-            steps {
-                jacoco execPattern: 'target/jacoco.exec'
-            }
-        }
-
-        stage('Archive Artifacts') {
-            steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-            }
-        }
-    }
-
-    post {
-        always {
-            echo 'Pipeline Finished'
         }
     }
 }
